@@ -161,6 +161,17 @@ function App() {
     toast.info("Tab suspension toggled (Chrome API integration required)")
   }
 
+  // Toggle group collapse
+  const toggleGroupCollapse = (groupId: string) => {
+    setTabGroups(current => 
+      current.map(group => 
+        group.id === groupId 
+          ? { ...group, collapsed: !group.collapsed }
+          : group
+      )
+    )
+  }
+
   // Export functionality
   const exportData = (format: 'csv' | 'txt') => {
     let content = ""
@@ -329,12 +340,12 @@ function App() {
               )}
             </div>
 
-            <div className="grid gap-3">
+            <div className="space-y-1">
               {filteredTabs.map((tab) => (
-                <Card 
-                  key={tab.id} 
-                  className={`cursor-pointer transition-all hover:shadow-md ${
-                    selectedTabs.includes(tab.id) ? 'ring-2 ring-primary' : ''
+                <div
+                  key={tab.id}
+                  className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
+                    selectedTabs.includes(tab.id) ? 'ring-2 ring-primary bg-primary/5' : 'bg-card'
                   } ${tab.suspended ? 'opacity-60' : ''}`}
                   onClick={() => {
                     setSelectedTabs(current => 
@@ -344,50 +355,47 @@ function App() {
                     )
                   }}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 rounded bg-muted flex-shrink-0">
-                        {tab.favicon ? (
-                          <img src={tab.favicon} alt="" className="w-4 h-4 rounded" />
-                        ) : (
-                          <Globe className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm text-foreground truncate">
-                          {tab.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground truncate mt-1">
-                          {tab.url}
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2 flex-shrink-0">
-                        {tab.tags.map(tag => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            toggleTabSuspension(tab.id)
-                          }}
-                        >
-                          {tab.suspended ? (
-                            <Play className="w-4 h-4" />
-                          ) : (
-                            <Pause className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="w-4 h-4 rounded bg-muted flex-shrink-0">
+                    {tab.favicon ? (
+                      <img src={tab.favicon} alt="" className="w-4 h-4 rounded" />
+                    ) : (
+                      <Globe className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-sm text-foreground truncate">
+                      {tab.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {tab.url}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    {tab.tags.map(tag => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        toggleTabSuspension(tab.id)
+                      }}
+                      className="h-7 w-7 p-0"
+                    >
+                      {tab.suspended ? (
+                        <Play className="w-3.5 h-3.5" />
+                      ) : (
+                        <Pause className="w-3.5 h-3.5" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           </TabsContent>
@@ -427,7 +435,12 @@ function App() {
                           <Badge variant="secondary">{group.tabs.length} tabs</Badge>
                         </div>
                         
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => toggleGroupCollapse(group.id)}
+                          className="h-8 w-8 p-0"
+                        >
                           {group.collapsed ? (
                             <ChevronRight className="w-4 h-4" />
                           ) : (
