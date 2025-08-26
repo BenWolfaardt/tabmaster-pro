@@ -73,45 +73,103 @@ function App() {
   const [newGroupName, setNewGroupName] = useState("")
   const [newGroupColor, setNewGroupColor] = useState("#1e40af")
 
-  // Mock data for demonstration (in real extension this would come from Chrome API)
-  const [currentTabs] = useState<Tab[]>([
-    {
-      id: "1",
-      title: "GitHub - Tab Manager Pro",
-      url: "https://github.com/user/tab-manager-pro",
-      favicon: "https://github.com/favicon.ico",
-      lastAccessed: Date.now() - 300000,
-      suspended: false,
-      tags: ["development", "github"]
-    },
-    {
-      id: "2", 
-      title: "React Documentation",
-      url: "https://react.dev",
-      favicon: "https://react.dev/favicon.ico",
-      lastAccessed: Date.now() - 600000,
-      suspended: false,
-      tags: ["development", "react"]
-    },
-    {
-      id: "3",
-      title: "Tailwind CSS Components",
-      url: "https://tailwindui.com/components",
-      favicon: "https://tailwindui.com/favicon.ico", 
-      lastAccessed: Date.now() - 1200000,
-      suspended: true,
-      tags: ["design", "css"]
-    },
-    {
-      id: "4",
-      title: "Chrome Extension Documentation",
-      url: "https://developer.chrome.com/docs/extensions",
-      favicon: "https://developer.chrome.com/favicon.ico",
-      lastAccessed: Date.now() - 1800000,
-      suspended: false,
-      tags: ["development", "chrome"]
+  // Current tabs from Chrome API or mock data
+  const [currentTabs, setCurrentTabs] = useState<Tab[]>([])
+  const [isExtensionMode, setIsExtensionMode] = useState(false)
+
+  // Check if running as Chrome extension
+  React.useEffect(() => {
+    const isExtension = !!(window.chrome && chrome.runtime && chrome.runtime.id)
+    setIsExtensionMode(isExtension)
+    
+    if (isExtension) {
+      loadTabsFromExtension()
+      loadGroupsFromExtension()
+    } else {
+      // Use mock data when not in extension mode
+      setCurrentTabs([
+        {
+          id: "1",
+          title: "GitHub - Tab Manager Pro",
+          url: "https://github.com/user/tab-manager-pro",
+          favicon: "https://github.com/favicon.ico",
+          lastAccessed: Date.now() - 300000,
+          suspended: false,
+          tags: ["development", "github"]
+        },
+        {
+          id: "2", 
+          title: "React Documentation",
+          url: "https://react.dev",
+          favicon: "https://react.dev/favicon.ico",
+          lastAccessed: Date.now() - 600000,
+          suspended: false,
+          tags: ["development", "react"]
+        },
+        {
+          id: "3",
+          title: "Tailwind CSS Components",
+          url: "https://tailwindui.com/components",
+          favicon: "https://tailwindui.com/favicon.ico", 
+          lastAccessed: Date.now() - 1200000,
+          suspended: true,
+          tags: ["design", "css"]
+        },
+        {
+          id: "4",
+          title: "Chrome Extension Documentation",
+          url: "https://developer.chrome.com/docs/extensions",
+          favicon: "https://developer.chrome.com/favicon.ico",
+          lastAccessed: Date.now() - 1800000,
+          suspended: false,
+          tags: ["development", "chrome"]
+        }
+      ])
     }
-  ])
+  }, [])
+
+  // Load tabs from Chrome extension
+  const loadTabsFromExtension = async () => {
+    try {
+      const response = await sendMessageToBackground({ action: 'getCurrentTabs' })
+      if (response.success) {
+        setCurrentTabs(response.data)
+      }
+    } catch (error) {
+      console.error('Failed to load tabs from extension:', error)
+      toast.error('Failed to load tabs from browser')
+    }
+  }
+
+  // Load groups from Chrome extension
+  const loadGroupsFromExtension = async () => {
+    try {
+      const response = await sendMessageToBackground({ action: 'getTabGroups' })
+      if (response.success) {
+        setTabGroups(response.data)
+      }
+    } catch (error) {
+      console.error('Failed to load groups from extension:', error)
+    }
+  }
+
+  // Send message to background script
+  const sendMessageToBackground = (message: any) => {
+    return new Promise<any>((resolve, reject) => {
+      if (!chrome.runtime?.sendMessage) {
+        reject(new Error('Chrome extension API not available'))
+        return
+      }
+
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message))
+        } else {
+          resolve(response)
+        }
+      })
+    })
+  }
 
   // Filter tabs based on search
   const filteredTabs = currentTabs.filter(tab => 
@@ -128,8 +186,8 @@ function App() {
     )
   )
 
-  // Create a new tab group
-  const createGroup = () => {
+  // Create a new tab group (updated for extension integration)
+  const createGroup = async () => {
     if (!newGroupName.trim()) {
       toast.error("Please enter a group name")
       return
@@ -140,25 +198,71 @@ function App() {
       return
     }
 
-    const selectedTabData = currentTabs.filter(tab => selectedTabs.includes(tab.id))
-    const newGroup: TabGroup = {
-      id: Date.now().toString(),
-      name: newGroupName,
-      color: newGroupColor,
-      tabs: selectedTabData,
-      collapsed: false
-    }
+    try {
+      if (isExtensionMode) {
+        // Use Chrome extension API
+        const response = await sendMessageToBackground({
+          action: 'createTabGroup',
+          data: {
+            name: newGroupName,
+            color: newGroupColor,
+            tabIds: selectedTabs
+          }
+        })
 
-    setTabGroups(current => [...current, newGroup])
-    setSelectedTabs([])
-    setNewGroupName("")
-    toast.success(`Created group "${newGroupName}" with ${selectedTabData.length} tabs`)
+        if (response.success) {
+          toast.success(`Created group "${newGroupName}" with ${response.data.tabCount} tabs`)
+          await loadGroupsFromExtension()
+          setSelectedTabs([])
+          setNewGroupName("")
+        }
+      } else {
+        // Fallback for non-extension mode
+        const selectedTabData = currentTabs.filter(tab => selectedTabs.includes(tab.id))
+        const newGroup: TabGroup = {
+          id: Date.now().toString(),
+          name: newGroupName,
+          color: newGroupColor,
+          tabs: selectedTabData,
+          collapsed: false
+        }
+
+        setTabGroups(current => [...current, newGroup])
+        setSelectedTabs([])
+        setNewGroupName("")
+        toast.success(`Created group "${newGroupName}" with ${selectedTabData.length} tabs`)
+      }
+    } catch (error) {
+      console.error('Failed to create group:', error)
+      toast.error('Failed to create group')
+    }
   }
 
-  // Toggle tab suspension
-  const toggleTabSuspension = (tabId: string) => {
-    // In real extension, this would call Chrome API
-    toast.info("Tab suspension toggled (Chrome API integration required)")
+  // Toggle tab suspension (updated for extension integration)
+  const toggleTabSuspension = async (tabId: string) => {
+    try {
+      if (isExtensionMode) {
+        const tab = currentTabs.find(t => t.id === tabId)
+        if (!tab) return
+
+        if (tab.suspended) {
+          await sendMessageToBackground({ action: 'restoreTab', tabId })
+          toast.info('Tab restored')
+        } else {
+          await sendMessageToBackground({ action: 'suspendTab', tabId })
+          toast.info('Tab suspended')
+        }
+
+        // Refresh tabs
+        await loadTabsFromExtension()
+      } else {
+        // Mock functionality for non-extension mode
+        toast.info("Tab suspension requires Chrome extension")
+      }
+    } catch (error) {
+      console.error('Failed to toggle tab suspension:', error)
+      toast.error('Failed to update tab state')
+    }
   }
 
   // Toggle group collapse
@@ -216,7 +320,22 @@ function App() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Folder weight="bold" className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h1 className="text-2xl font-semibold text-foreground">Tab Manager Pro</h1>
+              <div>
+                <h1 className="text-2xl font-semibold text-foreground">Tab Manager Pro</h1>
+                <div className="flex items-center gap-2">
+                  {isExtensionMode ? (
+                    <Badge variant="default" className="text-xs">
+                      <Globe className="w-3 h-3 mr-1" />
+                      Extension Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">
+                      <Settings className="w-3 h-3 mr-1" />
+                      Demo Mode
+                    </Badge>
+                  )}
+                </div>
+              </div>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -288,7 +407,7 @@ function App() {
           </TabsList>
 
           {/* Current Tabs Tab */}
-          <TabsContent value="current" className="space-y-6">
+          <TabsContent value="current" className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <h2 className="text-xl font-medium">Current Window</h2>
@@ -344,7 +463,7 @@ function App() {
               {filteredTabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`flex items-center space-x-3 p-3 rounded-lg border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
+                  className={`flex items-center space-x-3 p-2 rounded-lg border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
                     selectedTabs.includes(tab.id) ? 'ring-2 ring-primary bg-primary/5' : 'bg-card'
                   } ${tab.suspended ? 'opacity-60' : ''}`}
                   onClick={() => {
@@ -386,12 +505,12 @@ function App() {
                         e.stopPropagation()
                         toggleTabSuspension(tab.id)
                       }}
-                      className="h-7 w-7 p-0"
+                      className="h-6 w-6 p-0"
                     >
                       {tab.suspended ? (
-                        <Play className="w-3.5 h-3.5" />
+                        <Play className="w-3 h-3" />
                       ) : (
-                        <Pause className="w-3.5 h-3.5" />
+                        <Pause className="w-3 h-3" />
                       )}
                     </Button>
                   </div>
