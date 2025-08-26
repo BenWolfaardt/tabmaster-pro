@@ -108,41 +108,11 @@
         </div>
         
         <div class="quick-actions">
-            <button class="btn" onclick="openPopup()">Extension Popup</button>
-            <button class="btn btn-secondary" onclick="openDevInterface()">Development Interface</button>
+            <button class="btn" id="open-popup-btn">Extension Popup</button>
+            <button class="btn btn-secondary" id="open-dev-btn">Full Interface</button>
         </div>
     </div>
 
-    <script>
-        function openPopup() {
-            // Open the popup interface
-            chrome.windows.create({
-                url: chrome.runtime.getURL('popup.html'),
-                type: 'popup',
-                width: 400,
-                height: 600
-            });
-        }
-        
-        function openDevInterface() {
-            // Open the development server (if running)
-            chrome.tabs.create({
-                url: 'http://localhost:5173'
-            });
-        }
-        
-        // Auto-redirect to development interface after 3 seconds
-        setTimeout(() => {
-            if (confirm('Would you like to open the development interface?')) {
-                openDevInterface();
-            }
-        }, 3000);
-        
-        // Extension detection
-        if (window.chrome && chrome.runtime && chrome.runtime.id) {
-            console.log('Running as Chrome extension');
-            document.body.classList.add('extension-mode');
-        }
-    </script>
+    <script src="extension-handler.js"></script>
 </body>
 </html>

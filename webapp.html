@@ -32,24 +32,8 @@
 
 <body>
     <div id="root"></div>
+    <script src="webapp-extension.js"></script>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Extension detection - inline for reliability
-      (function() {
-        function initializeExtensionDetection() {
-          if (window.chrome && chrome.runtime && chrome.runtime.id) {
-            document.body.classList.add('extension-mode');
-            console.log('Running as Chrome extension');
-          }
-        }
-        
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initializeExtensionDetection);
-        } else {
-          initializeExtensionDetection();
-        }
-      })();
-    </script>
 </body>
 
 </html>
