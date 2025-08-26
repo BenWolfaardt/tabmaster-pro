@@ -72,6 +72,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("current")
   const [newGroupName, setNewGroupName] = useState("")
   const [newGroupColor, setNewGroupColor] = useState("#1e40af")
+  const [groupsCollapsed, setGroupsCollapsed] = useState(false)
 
   // Current tabs from Chrome API or mock data
   const [currentTabs, setCurrentTabs] = useState<Tab[]>([])
@@ -463,7 +464,7 @@ function App() {
               {filteredTabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`flex items-center space-x-3 p-2 rounded-lg border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
+                  className={`flex items-center space-x-3 p-1.5 rounded-md border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
                     selectedTabs.includes(tab.id) ? 'ring-2 ring-primary bg-primary/5' : 'bg-card'
                   } ${tab.suspended ? 'opacity-60' : ''}`}
                   onClick={() => {
@@ -483,17 +484,17 @@ function App() {
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm text-foreground truncate">
+                    <h3 className="font-medium text-xs text-foreground truncate">
                       {tab.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-[10px] text-muted-foreground truncate">
                       {tab.url}
                     </p>
                   </div>
                   
                   <div className="flex items-center space-x-2 flex-shrink-0">
                     {tab.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="text-xs">
+                      <Badge key={tag} variant="outline" className="text-[10px] px-1 py-0">
                         {tag}
                       </Badge>
                     ))}
@@ -505,12 +506,12 @@ function App() {
                         e.stopPropagation()
                         toggleTabSuspension(tab.id)
                       }}
-                      className="h-6 w-6 p-0"
+                      className="h-5 w-5 p-0"
                     >
                       {tab.suspended ? (
-                        <Play className="w-3 h-3" />
+                        <Play className="w-2.5 h-2.5" />
                       ) : (
-                        <Pause className="w-3 h-3" />
+                        <Pause className="w-2.5 h-2.5" />
                       )}
                     </Button>
                   </div>
@@ -522,90 +523,108 @@ function App() {
           {/* Tab Groups Tab */}
           <TabsContent value="groups" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-medium">Tab Groups</h2>
-              <Badge variant="secondary">{tabGroups.length} groups</Badge>
+              <div className="flex items-center space-x-3">
+                <h2 className="text-xl font-medium">Tab Groups</h2>
+                <Badge variant="secondary">{tabGroups.length} groups</Badge>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setGroupsCollapsed(!groupsCollapsed)}
+                  className="h-8 w-8 p-0"
+                >
+                  {groupsCollapsed ? (
+                    <ChevronRight className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
             </div>
 
-            {tabGroups.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <Folder className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-medium text-foreground mb-2">No groups yet</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Select tabs from the Current Tabs view and create your first group
-                  </p>
-                  <Button onClick={() => setActiveTab("current")}>
-                    Go to Current Tabs
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {filteredGroups.map((group) => (
-                  <Card key={group.id}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div 
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: group.color }}
-                          />
-                          <CardTitle className="text-lg">{group.name}</CardTitle>
-                          <Badge variant="secondary">{group.tabs.length} tabs</Badge>
-                        </div>
-                        
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          onClick={() => toggleGroupCollapse(group.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          {group.collapsed ? (
-                            <ChevronRight className="w-4 h-4" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    
-                    {!group.collapsed && (
-                      <CardContent className="pt-0">
-                        <div className="space-y-2">
-                          {group.tabs.map((tab) => (
-                            <div key={tab.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50">
-                              <div className="w-4 h-4 rounded bg-muted flex-shrink-0">
-                                {tab.favicon ? (
-                                  <img src={tab.favicon} alt="" className="w-4 h-4 rounded" />
-                                ) : (
-                                  <Globe className="w-4 h-4 text-muted-foreground" />
-                                )}
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm text-foreground truncate">
-                                  {tab.title}
-                                </h4>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {tab.url}
-                                </p>
-                              </div>
-                              
-                              <div className="flex items-center space-x-1">
-                                {tab.tags.map(tag => (
-                                  <Badge key={tag} variant="outline" className="text-xs">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    )}
+            {!groupsCollapsed && (
+              <>
+                {tabGroups.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <Folder className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="font-medium text-foreground mb-2">No groups yet</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Select tabs from the Current Tabs view and create your first group
+                      </p>
+                      <Button onClick={() => setActiveTab("current")}>
+                        Go to Current Tabs
+                      </Button>
+                    </CardContent>
                   </Card>
-                ))}
-              </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredGroups.map((group) => (
+                      <Card key={group.id}>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div 
+                                className="w-4 h-4 rounded-full"
+                                style={{ backgroundColor: group.color }}
+                              />
+                              <CardTitle className="text-lg">{group.name}</CardTitle>
+                              <Badge variant="secondary">{group.tabs.length} tabs</Badge>
+                            </div>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => toggleGroupCollapse(group.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              {group.collapsed ? (
+                                <ChevronRight className="w-4 h-4" />
+                              ) : (
+                                <ChevronDown className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        
+                        {!group.collapsed && (
+                          <CardContent className="pt-0">
+                            <div className="space-y-2">
+                              {group.tabs.map((tab) => (
+                                <div key={tab.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50">
+                                  <div className="w-4 h-4 rounded bg-muted flex-shrink-0">
+                                    {tab.favicon ? (
+                                      <img src={tab.favicon} alt="" className="w-4 h-4 rounded" />
+                                    ) : (
+                                      <Globe className="w-4 h-4 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-sm text-foreground truncate">
+                                      {tab.title}
+                                    </h4>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {tab.url}
+                                    </p>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-1">
+                                    {tab.tags.map(tag => (
+                                      <Badge key={tag} variant="outline" className="text-xs">
+                                        {tag}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
