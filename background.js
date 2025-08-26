@@ -76,6 +76,10 @@ class TabManagerBackground {
   async handleMessage(request, sender, sendResponse) {
     try {
       switch (request.action) {
+        case 'ping':
+          sendResponse({ success: true, message: 'Background script is running' });
+          break;
+
         case 'getCurrentTabs':
           const tabs = await this.getCurrentTabs();
           sendResponse({ success: true, data: tabs });
@@ -127,19 +131,25 @@ class TabManagerBackground {
 
   async getCurrentTabs() {
     const tabs = await chrome.tabs.query({});
-    return tabs.map(tab => ({
-      id: tab.id.toString(),
-      title: tab.title || 'Untitled',
-      url: tab.url || '',
-      favicon: tab.favIconUrl,
-      lastAccessed: Date.now(),
-      suspended: false, // We'll implement suspension separately
-      tags: await this.getTabTags(tab.id),
-      windowId: tab.windowId,
-      index: tab.index,
-      pinned: tab.pinned,
-      groupId: tab.groupId
-    }));
+    const result = [];
+    
+    for (const tab of tabs) {
+      result.push({
+        id: tab.id.toString(),
+        title: tab.title || 'Untitled',
+        url: tab.url || '',
+        favicon: tab.favIconUrl,
+        lastAccessed: Date.now(),
+        suspended: false, // We'll implement suspension separately
+        tags: await this.getTabTags(tab.id),
+        windowId: tab.windowId,
+        index: tab.index,
+        pinned: tab.pinned,
+        groupId: tab.groupId
+      });
+    }
+    
+    return result;
   }
 
   async getTabGroups() {
@@ -359,7 +369,13 @@ class TabManagerBackground {
 }
 
 // Initialize the background script
-const tabManager = new TabManagerBackground();
+let tabManager;
+try {
+  tabManager = new TabManagerBackground();
+  console.log('Tab Manager Pro background script initialized successfully');
+} catch (error) {
+  console.error('Failed to initialize Tab Manager Pro background script:', error);
+}
 
 // Handle extension startup
 chrome.runtime.onStartup.addListener(() => {

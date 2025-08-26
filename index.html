@@ -9,11 +9,28 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/src/main.css" rel="stylesheet" />
+    <style>
+      /* Extension-specific styles when running as extension */
+      .extension-mode {
+        border: 2px solid #10b981;
+        border-radius: 8px;
+        margin: 8px;
+      }
+    </style>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Extension integration script -->
+    <script>
+      // Detect if running as Chrome extension and add visual indicator
+      if (window.chrome && chrome.runtime && chrome.runtime.id) {
+        document.body.classList.add('extension-mode');
+        console.log('Running as Chrome extension');
+      }
+    </script>
 </body>
 
 </html>
