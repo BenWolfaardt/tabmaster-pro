@@ -1,36 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tab Manager Pro - Organize Your Browser Tabs</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="/src/main.css" rel="stylesheet" />
+    <title>Tab Manager Pro</title>
     <style>
-      /* Extension-specific styles when running as extension */
-      .extension-mode {
-        border: 2px solid #10b981;
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #f8fafc;
+        overflow: hidden;
+      }
+      
+      .extension-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      
+      .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #64748b;
+      }
+      
+      .loading h2 {
+        font-size: 24px;
+        margin-bottom: 8px;
+        color: #1e293b;
+      }
+      
+      .loading p {
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      
+      .dev-notice {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
         border-radius: 8px;
-        margin: 8px;
+        padding: 16px;
+        margin: 20px;
+        text-align: center;
+      }
+      
+      .dev-notice h3 {
+        color: #92400e;
+        margin: 0 0 8px 0;
+      }
+      
+      .dev-notice p {
+        color: #92400e;
+        margin: 0;
+        font-size: 13px;
+      }
+      
+      .quick-actions {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+      }
+      
+      .btn {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      
+      .btn:hover {
+        background: #2563eb;
+      }
+      
+      .btn-secondary {
+        background: #64748b;
+      }
+      
+      .btn-secondary:hover {
+        background: #475569;
       }
     </style>
 </head>
 
 <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Extension integration script -->
+    <div class="extension-container">
+        <div class="loading">
+            <h2>🗂️ Tab Manager Pro</h2>
+            <p>Loading the full interface...</p>
+        </div>
+        
+        <div class="dev-notice">
+            <h3>⚠️ Development Mode</h3>
+            <p>This extension is currently in development mode. Some features may require additional setup.</p>
+        </div>
+        
+        <div class="quick-actions">
+            <button class="btn" onclick="openPopup()">Extension Popup</button>
+            <button class="btn btn-secondary" onclick="openDevInterface()">Development Interface</button>
+        </div>
+    </div>
+
     <script>
-      // Detect if running as Chrome extension and add visual indicator
-      if (window.chrome && chrome.runtime && chrome.runtime.id) {
-        document.body.classList.add('extension-mode');
-        console.log('Running as Chrome extension');
-      }
+        function openPopup() {
+            // Open the popup interface
+            chrome.windows.create({
+                url: chrome.runtime.getURL('popup.html'),
+                type: 'popup',
+                width: 400,
+                height: 600
+            });
+        }
+        
+        function openDevInterface() {
+            // Open the development server (if running)
+            chrome.tabs.create({
+                url: 'http://localhost:5173'
+            });
+        }
+        
+        // Auto-redirect to development interface after 3 seconds
+        setTimeout(() => {
+            if (confirm('Would you like to open the development interface?')) {
+                openDevInterface();
+            }
+        }, 3000);
+        
+        // Extension detection
+        if (window.chrome && chrome.runtime && chrome.runtime.id) {
+            console.log('Running as Chrome extension');
+            document.body.classList.add('extension-mode');
+        }
     </script>
 </body>
-
 </html>
