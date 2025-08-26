@@ -4,115 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tab Manager Pro</title>
-    <style>
-      body {
-        width: 100vw;
-        height: 100vh;
-        margin: 0;
-        padding: 0;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: #f8fafc;
-        overflow: hidden;
-      }
-      
-      .extension-container {
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
-      
-      .loading {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        color: #64748b;
-      }
-      
-      .loading h2 {
-        font-size: 24px;
-        margin-bottom: 8px;
-        color: #1e293b;
-      }
-      
-      .loading p {
-        font-size: 14px;
-        margin-bottom: 20px;
-      }
-      
-      .dev-notice {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        border-radius: 8px;
-        padding: 16px;
-        margin: 20px;
-        text-align: center;
-      }
-      
-      .dev-notice h3 {
-        color: #92400e;
-        margin: 0 0 8px 0;
-      }
-      
-      .dev-notice p {
-        color: #92400e;
-        margin: 0;
-        font-size: 13px;
-      }
-      
-      .quick-actions {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 12px;
-      }
-      
-      .btn {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 500;
-      }
-      
-      .btn:hover {
-        background: #2563eb;
-      }
-      
-      .btn-secondary {
-        background: #64748b;
-      }
-      
-      .btn-secondary:hover {
-        background: #475569;
-      }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/src/main.css" rel="stylesheet">
 </head>
 
 <body>
-    <div class="extension-container">
-        <div class="loading">
-            <h2>🗂️ Tab Manager Pro</h2>
-            <p>Loading the full interface...</p>
-        </div>
-        
-        <div class="dev-notice">
-            <h3>⚠️ Development Mode</h3>
-            <p>This extension is currently in development mode. Some features may require additional setup.</p>
-        </div>
-        
-        <div class="quick-actions">
-            <button class="btn" id="open-popup-btn">Extension Popup</button>
-            <button class="btn btn-secondary" id="open-dev-btn">Full Interface</button>
-        </div>
-    </div>
-
-    <script src="extension-handler.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

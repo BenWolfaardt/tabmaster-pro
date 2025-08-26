@@ -29,7 +29,7 @@ import {
   Star,
   Archive
 } from "@phosphor-icons/react"
-import { toast } from 'sonner'
+import { toast, Toaster } from 'sonner'
 
 // Types for our data structures
 interface Tab {
@@ -72,7 +72,7 @@ function App() {
   const [activeTab, setActiveTab] = useState("current")
   const [newGroupName, setNewGroupName] = useState("")
   const [newGroupColor, setNewGroupColor] = useState("#1e40af")
-  const [groupsCollapsed, setGroupsCollapsed] = useState(false)
+  const [groupsCollapsed, setGroupsCollapsed] = useState(true)
 
   // Current tabs from Chrome API or mock data
   const [currentTabs, setCurrentTabs] = useState<Tab[]>([])
@@ -313,6 +313,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Toaster position="top-right" />
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-6 py-4">
@@ -464,8 +465,8 @@ function App() {
               {filteredTabs.map((tab) => (
                 <div
                   key={tab.id}
-                  className={`flex items-center space-x-3 p-1.5 rounded-md border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
-                    selectedTabs.includes(tab.id) ? 'ring-2 ring-primary bg-primary/5' : 'bg-card'
+                  className={`flex items-center space-x-2 p-1 rounded-sm border cursor-pointer transition-all hover:bg-muted/30 hover:shadow-sm ${
+                    selectedTabs.includes(tab.id) ? 'ring-1 ring-primary bg-primary/5' : 'bg-card'
                   } ${tab.suspended ? 'opacity-60' : ''}`}
                   onClick={() => {
                     setSelectedTabs(current => 
@@ -475,26 +476,26 @@ function App() {
                     )
                   }}
                 >
-                  <div className="w-4 h-4 rounded bg-muted flex-shrink-0">
+                  <div className="w-3 h-3 rounded bg-muted flex-shrink-0">
                     {tab.favicon ? (
-                      <img src={tab.favicon} alt="" className="w-4 h-4 rounded" />
+                      <img src={tab.favicon} alt="" className="w-3 h-3 rounded" />
                     ) : (
-                      <Globe className="w-4 h-4 text-muted-foreground" />
+                      <Globe className="w-3 h-3 text-muted-foreground" />
                     )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-xs text-foreground truncate">
+                    <h3 className="font-medium text-[11px] text-foreground truncate leading-tight">
                       {tab.title}
                     </h3>
-                    <p className="text-[10px] text-muted-foreground truncate">
+                    <p className="text-[9px] text-muted-foreground truncate">
                       {tab.url}
                     </p>
                   </div>
                   
-                  <div className="flex items-center space-x-2 flex-shrink-0">
+                  <div className="flex items-center space-x-1 flex-shrink-0">
                     {tab.tags.map(tag => (
-                      <Badge key={tag} variant="outline" className="text-[10px] px-1 py-0">
+                      <Badge key={tag} variant="outline" className="text-[8px] px-1 py-0 h-3">
                         {tag}
                       </Badge>
                     ))}
@@ -506,12 +507,12 @@ function App() {
                         e.stopPropagation()
                         toggleTabSuspension(tab.id)
                       }}
-                      className="h-5 w-5 p-0"
+                      className="h-4 w-4 p-0"
                     >
                       {tab.suspended ? (
-                        <Play className="w-2.5 h-2.5" />
+                        <Play className="w-2 h-2" />
                       ) : (
-                        <Pause className="w-2.5 h-2.5" />
+                        <Pause className="w-2 h-2" />
                       )}
                     </Button>
                   </div>
