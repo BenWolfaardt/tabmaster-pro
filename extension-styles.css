@@ -1,0 +1,39 @@
+/* Extension-specific styles */
+body {
+    width: 400px;
+    height: 600px;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+#popup-root {
+    width: 100%;
+    height: 100%;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+}
+
+/* Extension-specific styles when running as extension */
+.extension-mode {
+    border: 2px solid #10b981;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+/* Loading state */
+#root:empty::after {
+    content: 'Loading Tab Manager Pro...';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    color: #64748b;
+    font-family: Inter, system-ui, sans-serif;
+}

@@ -37,6 +37,7 @@
         "index.html", 
         "webapp.html",
         "test.html",
+        "extension-styles.css",
         "extension-handler.js", 
         "webapp-extension.js", 
         "src/*",
@@ -50,6 +51,6 @@
     }
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:;"
   }
 }
